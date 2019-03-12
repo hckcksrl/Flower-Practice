@@ -5,7 +5,6 @@ import Home from "../Route/Home";
 const mainTabNavigation = createBottomTabNavigator({
   Home: {
     screen: Home
-    // navigationOptions: {}
   },
   Flowers: {
     screen: View

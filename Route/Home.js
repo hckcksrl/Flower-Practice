@@ -38,141 +38,179 @@ const collections = [
 ];
 
 class Home extends Component {
+  constructor() {
+    super();
+    this.animation = new Animated.Value(0);
+    this.translate = new Animated.Value(0);
+    this.margin = new Animated.Value(50);
+  }
+
   componentWillMount() {
     this.scrollY = new Animated.Value(0);
-    this.startHeight = 60;
-    this.endHeight = 0;
-    this.statusHeight = 0;
-    this.touchHeight = 35;
-    if (Platform.OS === "android") {
-      this.statusHeight = StatusBar.currentHeight;
-    }
-
-    this.animatestatusHeight = this.scrollY.interpolate({
-      inputRange: [0, 50],
-      outputRange: [this.statusHeight, this.endHeight]
-    });
-
-    this.animateTouchHeight = this.scrollY.interpolate({
-      inputRange: [0, 50],
-      outputRange: [this.touchHeight, this.endHeight]
-    });
-
-    this.animateHeight = this.scrollY.interpolate({
-      inputRange: [0, 50],
-      outputRange: [this.startHeight, this.endHeight]
+    this.scrollOffset = 0;
+    this._panResponder = PanResponder.create({
+      onMoveShouldSetPanResponderCapture: (e, gestureState) => true,
+      onStartShouldSetPanResponderCapture: (e, gestureState) => true,
+      onPanResponderGrant: (e, gestureState) => {
+        true;
+      },
+      onPanResponderMove: (e, gestureState) => {
+        if (gestureState.dy < -20) {
+          Animated.timing(this.animation, {
+            toValue: 1,
+            duration: 500
+          }).start();
+        } else if (gestureState.dy > 20) {
+          Animated.timing(this.animation, {
+            toValue: 0,
+            duration: 500
+          }).start();
+        }
+      },
+      onPanResponderRelease: (e, gestureState) => {
+        this.animation.flattenOffset();
+      }
     });
   }
 
   render() {
     return (
-      <View style={styles.container}>
+      <Animated.View style={[styles.container]}>
+        <Animated.View style={{ position: "absolute" }}>
+          <Animated.View
+            style={[
+              {
+                height: 50,
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                marginLeft: 30
+              },
+              {
+                transform: [
+                  {
+                    translateY: this.animation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, -50]
+                    })
+                  }
+                ]
+              }
+            ]}
+          >
+            <TouchableOpacity
+              activeOpacity={0.5}
+              onPress={() => this.props.navigation.navigate("Search")}
+            >
+              <Animated.View
+                style={[
+                  {
+                    flexDirection: "row",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                    backgroundColor: "white",
+                    borderRadius: 5,
+                    height: 35,
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowColor: "black",
+                    shadowOpacity: 0.2,
+                    elevation: 5,
+                    width: Dimensions.get("window").width - 60
+                  }
+                ]}
+              >
+                <Icon
+                  name="search"
+                  size={25}
+                  style={[{ paddingRight: 5, fontSize: 25 }]}
+                  color="#a5a5a5"
+                />
+              </Animated.View>
+            </TouchableOpacity>
+          </Animated.View>
+        </Animated.View>
         <Animated.View
           style={{
-            height: this.animateHeight,
-            width: Dimensions.get("window").width - 40,
+            flex: 1,
             justifyContent: "center",
-            alignItems: "center"
+            alignItems: "center",
+            marginTop: this.animation.interpolate({
+              inputRange: [0, 1],
+              outputRange: [50, 0]
+            })
           }}
         >
-          <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              justifyContent: "flex-end",
-              alignItems: "center",
-              backgroundColor: "white",
-              borderRadius: 5,
-              height: 35,
-              shadowOffset: { width: 0, height: 1 },
-              shadowColor: "black",
-              shadowOpacity: 0.2,
-              elevation: 5,
-              width: Dimensions.get("window").width - 60,
-              zIndex: 2
+          <Animated.ScrollView
+            contentContainerStyle={{
+              justifyContent: "center",
+              alignItems: "center"
             }}
-            activeOpacity={0.5}
-            onPress={() => this.props.navigation.navigate("Flowers")}
+            showsVerticalScrollIndicator={false}
+            scrollEventThrottle={16}
+            onScroll={Animated.event([
+              { nativeEvent: { contentOffset: { y: this.scrollY } } }
+            ])}
+            {...this._panResponder.panHandlers}
           >
-            <Icon
-              name="search"
-              size={25}
-              style={{ paddingRight: 5 }}
-              color="#a5a5a5"
-            />
-          </TouchableOpacity>
-        </Animated.View>
-        <ScrollView
-          contentContainerStyle={{
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-          showsVerticalScrollIndicator={false}
-          style={{ paddingTop: 0 }}
-          scrollEventThrottle={1}
-          onScroll={Animated.event([
-            { nativeEvent: { contentOffset: { y: this.scrollY } } }
-          ])}
-        >
-          {collections.map((collection, key) => {
-            return (
-              <View style={styles.section} key={key}>
-                <View style={styles.sectionHeader}>
-                  <View style={{ flex: 5 }}>
-                    <Text
+            {collections.map((collection, key) => {
+              return (
+                <View style={styles.section} key={key}>
+                  <View style={styles.sectionHeader}>
+                    <View style={{ flex: 5 }}>
+                      <Text
+                        style={{
+                          fontSize: 30,
+                          color: "black",
+                          fontWeight: "900"
+                        }}
+                      >
+                        {collection.text}
+                      </Text>
+                    </View>
+                    <View
                       style={{
-                        fontSize: 30,
-                        color: "black",
-                        fontWeight: "900"
+                        flex: 1.2,
+                        justifyContent: "flex-end",
+                        alignItems: "flex-end"
                       }}
                     >
-                      {collection.text}
+                      <Text style={{ fontSize: 15, color: "blue" }}>
+                        모두 보기
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.sectionImage}>
+                    <Image
+                      source={collection.image.url}
+                      style={{
+                        width: Dimensions.get("window").width - 40,
+                        height: 430,
+                        borderRadius: 10
+                      }}
+                      resizeMode="stretch"
+                    />
+                  </View>
+                  <View style={styles.sectionName}>
+                    <Text style={{ fontSize: 15, color: "black" }}>
+                      {collection.image.smallname}
+                    </Text>
+                    <Text style={{ fontSize: 15, color: "#c9c7c7" }}>
+                      {collection.image.bigname}
                     </Text>
                   </View>
-                  <View
-                    style={{
-                      flex: 1.2,
-                      justifyContent: "flex-end",
-                      alignItems: "flex-end"
-                    }}
-                  >
-                    <Text style={{ fontSize: 15, color: "blue" }}>
-                      모두 보기
-                    </Text>
-                  </View>
                 </View>
-                <View style={styles.sectionImage}>
-                  <Image
-                    source={collection.image.url}
-                    style={{
-                      width: Dimensions.get("window").width - 40,
-                      height: 430,
-                      borderRadius: 10
-                    }}
-                    resizeMode="stretch"
-                  />
-                </View>
-                <View style={styles.sectionName}>
-                  <Text style={{ fontSize: 15, color: "black" }}>
-                    {collection.image.smallname}
-                  </Text>
-                  <Text style={{ fontSize: 15, color: "#c9c7c7" }}>
-                    {collection.image.bigname}
-                  </Text>
-                </View>
-              </View>
-            );
-          })}
-        </ScrollView>
-      </View>
+              );
+            })}
+          </Animated.ScrollView>
+        </Animated.View>
+      </Animated.View>
     );
   }
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center"
+    flex: 1
   },
   section: {
     flex: 1,
@@ -189,6 +227,20 @@ const styles = StyleSheet.create({
   },
   sectionName: {
     flex: 1
+  },
+  headerButton: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 5,
+    height: 35,
+    shadowOffset: { width: 0, height: 1 },
+    shadowColor: "black",
+    shadowOpacity: 0.2,
+    elevation: 5,
+    width: Dimensions.get("window").width - 60,
+    opacity: 1
   }
 });
 

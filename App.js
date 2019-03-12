@@ -13,7 +13,6 @@ export default class App extends React.Component {
   render() {
     return (
       <SafeAreaView style={{ flex: 1 }}>
-        <StatusBar hidden={false} />
         <AppContainer />
       </SafeAreaView>
     );
