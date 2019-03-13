@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from "react-navigation";
 import { View } from "react-native";
 import Home from "../Route/Home";
+import Library from "../Route/Library";
 
 const mainTabNavigation = createBottomTabNavigator({
   Home: {
@@ -13,7 +14,7 @@ const mainTabNavigation = createBottomTabNavigator({
     screen: View
   },
   Library: {
-    screen: View
+    screen: Library
   }
 });
 
