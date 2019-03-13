@@ -26,6 +26,7 @@ class Search extends Component {
               alignItems: "center",
               marginBottom: 10
             }}
+            onPress={() => this.props.navigation.navigate("List")}
           >
             <Text style={{ fontSize: 20, fontWeight: "bold", color: "white" }}>
               필터로 검색하기
